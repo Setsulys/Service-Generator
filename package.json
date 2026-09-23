@@ -1,0 +1,22 @@
+{
+  "name": "service-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Setsulys/Service-Generator.git"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Setsulys/Service-Generator/issues"
+  },
+  "homepage": "https://github.com/Setsulys/Service-Generator#readme",
+  "dependencies": {
+    "yaml": "^2.9.1"
+  }
+}
