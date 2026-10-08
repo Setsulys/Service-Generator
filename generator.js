@@ -1,72 +1,98 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
-
 const YAML = require('yaml');
 
 const args = process.argv.slice(2);
 const templateSelection = args[0];
 const projectName = args[1];
-const domainName = args[2];
+const customGroupId = args[2];
 
-if (!projectName || !domainName || !templateSelection) {
-    console.error("❌ Erreur : Veuillez fournir le template, le nom du projet ET le nom de l'entité.");
-    console.error("💡 Exemple : node generator.js hexagonal mon-app User");
+if (!projectName || !templateSelection) {
+    console.error("❌ Error : Select one template for the project '<'hexagonal|monolithic>.");
+    console.error("💡 Exemple : node generator.js hexagonal my-app [com.mycompany.service]");
     process.exit(1);
 }
 
 const templatePath = path.join(__dirname, 'templates', templateSelection + '.yaml');
 if (!fs.existsSync(templatePath)) {
-    console.error(`❌ Erreur : Template introuvable : ${templatePath}`);
+    console.error(`❌ Error : Template not found : ${templatePath}`);
     process.exit(1);
 }
 
 const yamlFile = fs.readFileSync(templatePath, 'utf8');
 const templateConfig = YAML.parse(yamlFile);
 
-// Sanitisation stricte de toutes les entrées utilisateur injectées dans des chemins de fichiers
 const projectFolderName = projectName.toLowerCase().replace(/[^a-z0-9-_]/g, '');
-const domainSafe = domainName.replace(/[^a-zA-Z0-9]/g, '');
 
-if (!projectFolderName || !domainSafe) {
-    console.error("❌ Erreur : le nom du projet et le nom de l'entité doivent contenir au moins un caractère alphanumérique.");
+if (!projectFolderName) {
+    console.error("❌ Error : Project Label should have at least one aphanumeric character.");
     process.exit(1);
 }
 
-const domainUpper = domainSafe.charAt(0).toUpperCase() + domainSafe.slice(1);
-const domainLower = domainSafe.charAt(0).toLowerCase() + domainSafe.slice(1);
+const projectPascalCase = projectFolderName
+    .split(/[-_]/)
+    .filter(Boolean)
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+
 const packageSafeName = projectFolderName.replace(/[-_]/g, '');
 
-const baseGroupId = templateConfig.config.baseGroupId;
+const baseGroupId = (customGroupId || templateConfig.config?.baseGroupId)
+    .toLowerCase()
+    .replace(/[^a-z0-9.]/g, '');
+
 const basePackage = `${baseGroupId}.${packageSafeName}`;
 const packagePath = basePackage.replace(/\./g, '/');
 const outputDir = path.join(__dirname, 'out');
 const rootDir = path.join(outputDir, projectFolderName);
 
-// Contexte "plat" : les clés de templateConfig.config sont accessibles directement,
-// ex: {{springBootVersion}}, {{kotlinVersion}}, {{javaVersion}}, {{baseGroupId}}
 const context = {
     projectName,
     projectFolderName,
-    domainUpper,
-    domainLower,
+    projectPascalCase,
+    baseGroupId,
     basePackage,
     packagePath,
     ...templateConfig.config
 };
 
 function render(templateStr, ctx) {
-    return templateStr.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+    if (!templateStr) return '';
+    return templateStr.replace(/\{\{([\w-]+)\}\}/g, (match, key) => {
         if (ctx[key] === undefined) {
-            throw new Error(`Placeholder non résolu : {{${key}}} — vérifiez le template YAML.`);
+            throw new Error(`❌ Placeholder not found : {{${key}}} — check 'config' section or YAML template.`);
         }
         return ctx[key];
     });
 }
 
+function writeFileWithSanityCheck(evaluatedPath, rawContent, resolvedRootDir) {
+    const fullFilePath = path.resolve(rootDir, evaluatedPath);
+
+    if (!fullFilePath.startsWith(resolvedRootDir + path.sep)) {
+        throw new Error(`❌ Weird file path (Out of project directory) : ${evaluatedPath}`);
+    }
+
+    const fullDirPath = path.dirname(fullFilePath);
+
+    if (!fs.existsSync(fullDirPath)) {
+        fs.mkdirSync(fullDirPath, { recursive: true });
+    }
+
+    let evaluatedContent = render(rawContent, context);
+
+    evaluatedContent = evaluatedContent
+        .replace(/^package\s+([a-zA-Z0-9_/\.]+)/gm, (match, p1) => `package ${p1.replace(/\//g, '.')}`)
+        .replace(/^import\s+([a-zA-Z0-9_/\.]+)/gm, (match, p1) => `import ${p1.replace(/\//g, '.')}`);
+
+    fs.writeFileSync(fullFilePath, evaluatedContent.trim() + '\n', 'utf-8');
+    console.log(`  ✅ Generated : ${evaluatedPath}`);
+}
+
 function generateProject() {
     if (fs.existsSync(rootDir)) {
-        console.error(`❌ Erreur : le dossier ./out/${projectFolderName} existe déjà.`);
+        console.error(`❌ Error : Directory ./out/${projectFolderName} already exist.`);
         process.exit(1);
     }
 
@@ -74,41 +100,38 @@ function generateProject() {
         fs.mkdirSync(outputDir, { recursive: true });
     }
 
-    console.log(`📁 Création du dossier projet : ./out/${projectFolderName}`);
+    console.log(`📁 Creating Project folder : ./out/${projectFolderName}`);
 
     const resolvedRootDir = path.resolve(rootDir);
+    const fileEntries = templateConfig.Project?.paths || templateConfig.files || [];
 
-    templateConfig.files.forEach(file => {
-        const evaluatedPath = render(file.path, context);
-        const fullFilePath = path.resolve(rootDir, evaluatedPath);
+    fileEntries.forEach(entry => {
+        const basePath = render(entry.path, context);
 
-        // 🔒 Garde-fou anti path traversal : le fichier généré doit rester dans rootDir
-        if (!fullFilePath.startsWith(resolvedRootDir + path.sep)) {
-            throw new Error(`❌ Chemin de fichier suspect (hors du dossier projet) : ${evaluatedPath}`);
+        if (entry.content !== undefined) {
+            writeFileWithSanityCheck(basePath, entry.content, resolvedRootDir);
         }
 
-        const fullDirPath = path.dirname(fullFilePath);
-
-        if (!fs.existsSync(fullDirPath)) {
-            fs.mkdirSync(fullDirPath, { recursive: true });
+        if (Array.isArray(entry.files)) {
+            entry.files.forEach(fileItem => {
+                const subPath = render(fileItem.subpath, context);
+                const fullRelativePath = path.join(basePath, subPath);
+                writeFileWithSanityCheck(fullRelativePath, fileItem.content || '', resolvedRootDir);
+            });
         }
-
-        const evaluatedContent = render(file.content, context);
-        fs.writeFileSync(fullFilePath, evaluatedContent.trim() + '\n', 'utf-8');
-        console.log(`  ✅ Généré : ${evaluatedPath}`);
     });
 
     try {
-        console.log("🔧 Initialisation du dépôt Git...");
+        console.log("🔧 Init Git depot ...");
         execSync('git init', { cwd: rootDir, stdio: 'ignore' });
         execSync('git add .', { cwd: rootDir, stdio: 'ignore' });
         execSync('git commit -m "Initial commit from external YAML templates"', { cwd: rootDir, stdio: 'ignore' });
-        console.log("✅ Git initialisé !");
+        console.log("  ✅ Git inited !");
     } catch (error) {
-        console.log("⚠️ Git n'a pas pu être configuré automatiquement (dépôt non initialisé).");
+        console.log("⚠️ Git couldn't be configured automatically.");
     }
 
-    console.log(`\n🎉 Projet "${projectName}" (Kotlin + Maven) créé avec succès dans ./out/${projectFolderName} !`);
+    console.log(`\n🎉 Project "${projectName}" sucessfully generated ./out/${projectFolderName} !`);
 }
 
 generateProject();
