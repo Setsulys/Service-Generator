@@ -41,17 +41,16 @@ Remaining Thing (frameworks,Databases, API, UI Interfaces) should be outside the
 ```
 **Principles**
 
->**The Core (Domain)** : 
-<br>
->Contain the pure Business logic and entities, none of the dependency should be directed to external libraries or frameworks
+> **The Core (Domain)** :<br>
+> Contain the pure Business logic and entities, none of the dependency should be directed to external libraries or frameworks
 >
 > **The Ports (Interfaces)** :
->- Inbound (Driving) : Use Cases / Services are exposed outside 
->- Outbound (Driven) : Interfaces required by the Business Layer to work (ex: UserRepository).
+> - Inbound (Driving) : Use Cases / Services are exposed outside 
+> - Outbound (Driven) : Interfaces required by the Business Layer to work (ex: UserRepository).
 >
 > **Adapters** :
->- Incoming Adapters : Transform external request (REST controller) to inbound Call
->- Outcoming Adapters : Implements outbound interfaces to interact with the outside (JDBCRepositoryAdapter talking with Database) 
+> - Incoming Adapters : Transform external request (REST controller) to inbound Call
+> - Outcoming Adapters : Implements outbound interfaces to interact with the outside (JDBCRepositoryAdapter talking with Database) 
 
 
 ---
@@ -71,20 +70,16 @@ The traditional 3 Layer architecture structure the code in an verticaly descendi
 ```
 
 **Principes**
-> **UI Layer** : 
-<br>
+> **UI Layer** :<br>
 > Receive HTTP/UI requests,check the entries and send it to the Business Layer.
 >
-> **Business Layer (Service)** : 
-<br>
->Contain the company logic, but depend directly of the database layer to find or save elements.
+> **Business Layer (Service)** : <br>
+> Contain the company logic, but depend directly of the database layer to find or save elements.
 >
-> **Database Access (DAO/Repository)** : 
-<br>
->Interact with Database or External Services.
+> **Database Access (DAO/Repository)** : <br>
+> Interact with Database or External Services.
 >
-> **Major limit**
-<br>
+> **Major limit** <br>
 > The Business Layer is highly Database Layer dependent (and often of the persistance framework, like Hibernate/JPA)
 > The database technology infect the Business Layer
 
