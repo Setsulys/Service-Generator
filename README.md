@@ -69,7 +69,7 @@ The traditional 3 Layer architecture structure the code in an verticaly descendi
  [ Database Access Layer ]   --> (Entities JPA, Repositories, SQL)
 ```
 
-**Principes**
+**Principles**
 > **UI Layer** :<br>
 > Receive HTTP/UI requests,check the entries and send it to the Business Layer.
 >
