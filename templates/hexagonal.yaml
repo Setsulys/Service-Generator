@@ -1,467 +1,132 @@
 # Configuration globale par défaut
 config:
-  springBootVersion: "3.3.4"
-  kotlinVersion: "1.9.25"
-  javaVersion: "17"
-  baseGroupId: "com.example"
-  mockkVersion: "1.13.12"
+  springBoot-version: 4.0.0
+  springBootStarterParent-version: 4.1.1
+  java-version: 25
+  kotlin-version: 2.4.20
+  junit-version: 6.0.3
+  mockk-version: 1.14.11
+  springdoc-version: 3.1.1
+  jdbc-version: 4.1.1
+  liquibase-version: 4.1.1
+  webmvc-ui-version: 3.1.1
 
-# Définition des templates de fichiers
-files:
+  baseGroupId: com.example
+
+# Definition propre templates
+Project:
+  paths:
   - path: "pom.xml"
     content: |
       <?xml version="1.0" encoding="UTF-8"?>
-      <project xmlns="http://maven.apache.org/POM/4.0.0"
-               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-               xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-          <modelVersion>4.0.0</modelVersion>
+      <project xmlns="http://apache.org"
+               xmlns:xsi="http://w3.org"
+               xsi:schemaLocation="http://apache.org http://apache.org">
+          <modelVersion>{{springBoot-version}}</modelVersion>
+
           <parent>
               <groupId>org.springframework.boot</groupId>
               <artifactId>spring-boot-starter-parent</artifactId>
-              <version>{{springBootVersion}}</version>
+              <version>{{springBootStarterParent-version}}</version>
               <relativePath/>
           </parent>
-          <groupId>{{baseGroupId}}</groupId>
-          <artifactId>{{projectFolderName}}</artifactId>
+
+          <groupId>{{basePackage}}</groupId>
+          <artifactId>{{projectName}}</artifactId>
           <version>0.0.1-SNAPSHOT</version>
-          <name>{{projectFolderName}}</name>
+          <packaging>pom</packaging>
+          <name>{{projectName}}</name>
+          <description>{{projectName}} Parent Project</description>
+
+          <modules>
+              <module>domain</module>
+              <module>infrastructure</module>
+          </modules>
 
           <properties>
-              <java.version>{{javaVersion}}</java.version>
-              <kotlin.version>{{kotlinVersion}}</kotlin.version>
+              <java.version>{{java-version}}</java.version>
+              <kotlin.version>{{kotlin-version}}</kotlin.version>
+              <junit.version>{{junit-version}}</junit.version>
+              <mockk.version>{{mockk-version}}</mockk.version>
           </properties>
 
           <dependencies>
+              <!-- Test -->
+              
               <dependency>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-web</artifactId>
-              </dependency>
-              <dependency>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-validation</artifactId>
-              </dependency>
-              <dependency>
-                  <groupId>com.fasterxml.jackson.module</groupId>
-                  <artifactId>jackson-module-kotlin</artifactId>
-              </dependency>
-              <dependency>
-                  <groupId>org.jetbrains.kotlin</groupId>
-                  <artifactId>kotlin-reflect</artifactId>
-              </dependency>
-              <dependency>
-                  <groupId>org.jetbrains.kotlin</groupId>
-                  <artifactId>kotlin-stdlib</artifactId>
-              </dependency>
-              <dependency>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-test</artifactId>
-                  <scope>test</scope>
-              </dependency>
-              <dependency>
-                  <groupId>io.mockk</groupId>
-                  <artifactId>mockk-jvm</artifactId>
-                  <version>{{mockkVersion}}</version>
+                  <groupId>org.junit.jupiter</groupId>
+                  <artifactId>junit-jupiter-engine</artifactId>
+                  <version>${junit.version}</version>
                   <scope>test</scope>
               </dependency>
           </dependencies>
 
+          <dependencyManagement>
+              <dependencies>
+                  
+                  <dependency>
+                      <groupId>io.mockk</groupId>
+                      <artifactId>mockk-jvm</artifactId>
+                      <version>${mockk.version}</version>
+                      <scope>test</scope>
+                  </dependency>
+                  <dependency>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib</artifactId>
+                    <version>${kotlin.version}</version>
+                  </dependency>
+                  <dependency>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-reflect</artifactId>
+                    <version>${kotlin.version}</version>
+                  </dependency>
+              </dependencies>
+          </dependencyManagement>
+
           <build>
-              <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
-              <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
-              <plugins>
-                  <plugin>
-                      <groupId>org.springframework.boot</groupId>
-                      <artifactId>spring-boot-maven-plugin</artifactId>
-                  </plugin>
-                  <plugin>
-                      <groupId>org.jetbrains.kotlin</groupId>
-                      <artifactId>kotlin-maven-plugin</artifactId>
-                      <configuration>
-                          <args>
-                              <arg>-Xjsr305=strict</arg>
-                          </args>
-                          <compilerPlugins>
-                              <plugin>spring</plugin>
-                          </compilerPlugins>
-                      </configuration>
-                      <executions>
-                          <execution>
-                              <id>compile</id>
-                              <phase>compile</phase>
-                              <goals>
-                                  <goal>compile</goal>
-                              </goals>
-                          </execution>
-                          <execution>
-                              <id>test-compile</id>
-                              <phase>test-compile</phase>
-                              <goals>
-                                  <goal>test-compile</goal>
-                              </goals>
-                          </execution>
-                      </executions>
-                      <dependencies>
-                          <dependency>
-                              <groupId>org.jetbrains.kotlin</groupId>
-                              <artifactId>kotlin-maven-allopen</artifactId>
-                              <version>${kotlin.version}</version>
-                          </dependency>
-                      </dependencies>
-                  </plugin>
-              </plugins>
+              <pluginManagement>
+                  <plugins>
+                      <plugin>
+                          <groupId>org.jetbrains.kotlin</groupId>
+                          <artifactId>kotlin-maven-plugin</artifactId>
+                          <version>${kotlin.version}</version>
+                          <executions>
+                              <execution>
+                                  <id>compile</id>
+                                  <phase>compile</phase>
+                                  <goals>
+                                      <goal>compile</goal>
+                                  </goals>
+                              </execution>
+                              <execution>
+                                  <id>test-compile</id>
+                                  <phase>test-compile</phase>
+                                  <goals>
+                                      <goal>test-compile</goal>
+                                  </goals>
+                              </execution>
+                          </executions>
+                          <configuration>
+                              <args>
+                                  <arg>-Xjsr305=strict</arg>
+                              </args>
+                              <compilerPlugins>
+                                  <plugin>spring</plugin>
+                              </compilerPlugins>
+                              <jvmTarget>${java.version}</jvmTarget>
+                          </configuration>
+                          <dependencies>
+                              <dependency>
+                                  <groupId>org.jetbrains.kotlin</groupId>
+                                  <artifactId>kotlin-maven-allopen</artifactId>
+                                  <version>${kotlin.version}</version>
+                              </dependency>
+                          </dependencies>
+                      </plugin>
+                  </plugins>
+              </pluginManagement>
           </build>
       </project>
-
-  - path: "src/main/resources/application.properties"
-    content: |
-      spring.application.name={{projectFolderName}}
-      server.port=8080
-
-  - path: "src/main/kotlin/{{packagePath}}/{{domainUpper}}Application.kt"
-    content: |
-      package {{basePackage}}
-
-      import org.springframework.boot.autoconfigure.SpringBootApplication
-      import org.springframework.boot.runApplication
-
-      @SpringBootApplication
-      class {{domainUpper}}Application
-
-      fun main(args: Array<String>) {
-          runApplication<{{domainUpper}}Application>(*args)
-      }
-
-  # --- Domaine : modèle métier pur, aucune dépendance externe ---
-  - path: "src/main/kotlin/{{packagePath}}/domain/model/{{domainUpper}}.kt"
-    content: |
-      package {{basePackage}}.domain.model
-
-      data class {{domainUpper}}(
-          val id: Long? = null,
-          val name: String
-      )
-
-  # --- Exceptions métier ---
-  - path: "src/main/kotlin/{{packagePath}}/domain/exception/{{domainUpper}}NotFoundException.kt"
-    content: |
-      package {{basePackage}}.domain.exception
-
-      class {{domainUpper}}NotFoundException(id: Long) : RuntimeException("{{domainUpper}} not found with id: $id")
-
-  # --- Ports inbound : contrats exposés par le domaine (interfaces uniquement) ---
-  - path: "src/main/kotlin/{{packagePath}}/domain/ports/inbound/Create{{domainUpper}}UseCase.kt"
-    content: |
-      package {{basePackage}}.domain.ports.inbound
-
-      import {{basePackage}}.domain.model.{{domainUpper}}
-
-      interface Create{{domainUpper}}UseCase {
-          fun create({{domainLower}}: {{domainUpper}}): {{domainUpper}}
-      }
-
-  - path: "src/main/kotlin/{{packagePath}}/domain/ports/inbound/Get{{domainUpper}}ByIdUseCase.kt"
-    content: |
-      package {{basePackage}}.domain.ports.inbound
-
-      import {{basePackage}}.domain.model.{{domainUpper}}
-
-      interface Get{{domainUpper}}ByIdUseCase {
-          fun findById(id: Long): {{domainUpper}}
-      }
-
-  # --- Ports outbound : contrats requis par le domaine (interfaces uniquement) ---
-  - path: "src/main/kotlin/{{packagePath}}/domain/ports/outbound/{{domainUpper}}RepositoryPort.kt"
-    content: |
-      package {{basePackage}}.domain.ports.outbound
-
-      import {{basePackage}}.domain.model.{{domainUpper}}
-
-      interface {{domainUpper}}RepositoryPort {
-          fun save({{domainLower}}: {{domainUpper}}): {{domainUpper}}
-          fun findById(id: Long): {{domainUpper}}?
-      }
-
-  # --- Service applicatif : implémentation des use cases, ne dépend que des ports ---
-  - path: "src/main/kotlin/{{packagePath}}/domain/service/{{domainUpper}}Service.kt"
-    content: |
-      package {{basePackage}}.domain.service
-
-      import {{basePackage}}.domain.exception.{{domainUpper}}NotFoundException
-      import {{basePackage}}.domain.model.{{domainUpper}}
-      import {{basePackage}}.domain.ports.inbound.Create{{domainUpper}}UseCase
-      import {{basePackage}}.domain.ports.inbound.Get{{domainUpper}}ByIdUseCase
-      import {{basePackage}}.domain.ports.outbound.{{domainUpper}}RepositoryPort
-
-      class {{domainUpper}}Service(
-          private val {{domainLower}}RepositoryPort: {{domainUpper}}RepositoryPort
-      ) : Create{{domainUpper}}UseCase, Get{{domainUpper}}ByIdUseCase {
-
-          override fun create({{domainLower}}: {{domainUpper}}): {{domainUpper}} {
-              return {{domainLower}}RepositoryPort.save({{domainLower}})
-          }
-
-          override fun findById(id: Long): {{domainUpper}} {
-              return {{domainLower}}RepositoryPort.findById(id)
-                  ?: throw {{domainUpper}}NotFoundException(id)
-          }
-      }
-
-  # --- Adaptateur inbound : DTOs dédiés + validation, ne fuient pas le modèle de domaine ---
-  - path: "src/main/kotlin/{{packagePath}}/infrastructure/adapters/inbound/web/{{domainUpper}}Dtos.kt"
-    content: |
-      package {{basePackage}}.infrastructure.adapters.inbound.web
-
-      import {{basePackage}}.domain.model.{{domainUpper}}
-      import jakarta.validation.constraints.NotBlank
-
-      data class Create{{domainUpper}}Request(
-          @field:NotBlank(message = "name must not be blank")
-          val name: String
-      ) {
-          fun toDomain(): {{domainUpper}} = {{domainUpper}}(name = name)
-      }
-
-      data class {{domainUpper}}Response(
-          val id: Long?,
-          val name: String
-      ) {
-          companion object {
-              fun from({{domainLower}}: {{domainUpper}}): {{domainUpper}}Response =
-                  {{domainUpper}}Response(id = {{domainLower}}.id, name = {{domainLower}}.name)
-          }
-      }
-
-  - path: "src/main/kotlin/{{packagePath}}/infrastructure/adapters/inbound/web/{{domainUpper}}Controller.kt"
-    content: |
-      package {{basePackage}}.infrastructure.adapters.inbound.web
-
-      import {{basePackage}}.domain.ports.inbound.Create{{domainUpper}}UseCase
-      import {{basePackage}}.domain.ports.inbound.Get{{domainUpper}}ByIdUseCase
-      import jakarta.validation.Valid
-      import org.springframework.http.HttpStatus
-      import org.springframework.http.ResponseEntity
-      import org.springframework.web.bind.annotation.*
-
-      @RestController
-      @RequestMapping("/api/{{domainLower}}s")
-      class {{domainUpper}}Controller(
-          private val create{{domainUpper}}UseCase: Create{{domainUpper}}UseCase,
-          private val get{{domainUpper}}ByIdUseCase: Get{{domainUpper}}ByIdUseCase
-      ) {
-          @PostMapping
-          fun create(@Valid @RequestBody request: Create{{domainUpper}}Request): ResponseEntity<{{domainUpper}}Response> {
-              val created = create{{domainUpper}}UseCase.create(request.toDomain())
-              return ResponseEntity.status(HttpStatus.CREATED).body({{domainUpper}}Response.from(created))
-          }
-
-          @GetMapping("/{id}")
-          fun getById(@PathVariable id: Long): ResponseEntity<{{domainUpper}}Response> {
-              val found = get{{domainUpper}}ByIdUseCase.findById(id)
-              return ResponseEntity.ok({{domainUpper}}Response.from(found))
-          }
-      }
-
-  # --- Gestion centralisée des erreurs : mappe les exceptions métier et de validation vers des codes HTTP ---
-  - path: "src/main/kotlin/{{packagePath}}/infrastructure/adapters/inbound/web/GlobalExceptionHandler.kt"
-    content: |
-      package {{basePackage}}.infrastructure.adapters.inbound.web
-
-      import {{basePackage}}.domain.exception.{{domainUpper}}NotFoundException
-      import org.springframework.http.HttpStatus
-      import org.springframework.http.ResponseEntity
-      import org.springframework.web.bind.MethodArgumentNotValidException
-      import org.springframework.web.bind.annotation.ExceptionHandler
-      import org.springframework.web.bind.annotation.RestControllerAdvice
-
-      data class ErrorResponse(
-          val status: Int,
-          val message: String,
-          val errors: List<String> = emptyList()
-      )
-
-      @RestControllerAdvice
-      class GlobalExceptionHandler {
-
-          @ExceptionHandler({{domainUpper}}NotFoundException::class)
-          fun handleNotFound(ex: {{domainUpper}}NotFoundException): ResponseEntity<ErrorResponse> {
-              return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                  ErrorResponse(status = HttpStatus.NOT_FOUND.value(), message = ex.message ?: "Not found")
-              )
-          }
-
-          @ExceptionHandler(MethodArgumentNotValidException::class)
-          fun handleValidation(ex: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
-              val fieldErrors = ex.bindingResult.fieldErrors.map { "${it.field}: ${it.defaultMessage}" }
-              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                  ErrorResponse(status = HttpStatus.BAD_REQUEST.value(), message = "Validation failed", errors = fieldErrors)
-              )
-          }
-      }
-
-  # --- Adaptateur outbound : implémentation du port de persistance (en mémoire, à remplacer par JPA/JDBC/etc.) ---
-  - path: "src/main/kotlin/{{packagePath}}/infrastructure/adapters/outbound/persistence/InMemory{{domainUpper}}RepositoryAdapter.kt"
-    content: |
-      package {{basePackage}}.infrastructure.adapters.outbound.persistence
-
-      import {{basePackage}}.domain.model.{{domainUpper}}
-      import {{basePackage}}.domain.ports.outbound.{{domainUpper}}RepositoryPort
-      import java.util.concurrent.ConcurrentHashMap
-      import java.util.concurrent.atomic.AtomicLong
-
-      class InMemory{{domainUpper}}RepositoryAdapter : {{domainUpper}}RepositoryPort {
-          private val storage = ConcurrentHashMap<Long, {{domainUpper}}>()
-          private val idGenerator = AtomicLong(0)
-
-          override fun save({{domainLower}}: {{domainUpper}}): {{domainUpper}} {
-              val id = {{domainLower}}.id ?: idGenerator.incrementAndGet()
-              val saved = {{domainLower}}.copy(id = id)
-              storage[id] = saved
-              return saved
-          }
-
-          override fun findById(id: Long): {{domainUpper}}? = storage[id]
-      }
-
-  # --- Câblage Spring : les beans sont typés par interface, jamais par implémentation concrète ---
-  - path: "src/main/kotlin/{{packagePath}}/infrastructure/config/{{domainUpper}}BeanConfiguration.kt"
-    content: |
-      package {{basePackage}}.infrastructure.config
-
-      import {{basePackage}}.domain.ports.inbound.Create{{domainUpper}}UseCase
-      import {{basePackage}}.domain.ports.inbound.Get{{domainUpper}}ByIdUseCase
-      import {{basePackage}}.domain.ports.outbound.{{domainUpper}}RepositoryPort
-      import {{basePackage}}.domain.service.{{domainUpper}}Service
-      import {{basePackage}}.infrastructure.adapters.outbound.persistence.InMemory{{domainUpper}}RepositoryAdapter
-      import org.springframework.context.annotation.Bean
-      import org.springframework.context.annotation.Configuration
-
-      @Configuration
-      class {{domainUpper}}BeanConfiguration {
-
-          @Bean
-          fun {{domainLower}}RepositoryPort(): {{domainUpper}}RepositoryPort {
-              return InMemory{{domainUpper}}RepositoryAdapter()
-          }
-
-          @Bean
-          fun create{{domainUpper}}UseCase({{domainLower}}RepositoryPort: {{domainUpper}}RepositoryPort): Create{{domainUpper}}UseCase {
-              return {{domainUpper}}Service({{domainLower}}RepositoryPort)
-          }
-
-          @Bean
-          fun get{{domainUpper}}ByIdUseCase({{domainLower}}RepositoryPort: {{domainUpper}}RepositoryPort): Get{{domainUpper}}ByIdUseCase {
-              return {{domainUpper}}Service({{domainLower}}RepositoryPort)
-          }
-      }
-
-  # --- Tests unitaires du service (domaine, sans Spring) ---
-  - path: "src/test/kotlin/{{packagePath}}/domain/service/{{domainUpper}}ServiceTest.kt"
-    content: |
-      package {{basePackage}}.domain.service
-
-      import {{basePackage}}.domain.exception.{{domainUpper}}NotFoundException
-      import {{basePackage}}.domain.model.{{domainUpper}}
-      import {{basePackage}}.domain.ports.outbound.{{domainUpper}}RepositoryPort
-      import io.mockk.every
-      import io.mockk.mockk
-      import io.mockk.verify
-      import org.junit.jupiter.api.Assertions.assertEquals
-      import org.junit.jupiter.api.Assertions.assertThrows
-      import org.junit.jupiter.api.Test
-
-      class {{domainUpper}}ServiceTest {
-
-          private val {{domainLower}}RepositoryPort = mockk<{{domainUpper}}RepositoryPort>()
-          private val service = {{domainUpper}}Service({{domainLower}}RepositoryPort)
-
-          @Test
-          fun `create should save and return the {{domainLower}}`() {
-              val input = {{domainUpper}}(name = "test")
-              val saved = input.copy(id = 1L)
-              every { {{domainLower}}RepositoryPort.save(input) } returns saved
-
-              val result = service.create(input)
-
-              assertEquals(saved, result)
-              verify(exactly = 1) { {{domainLower}}RepositoryPort.save(input) }
-          }
-
-          @Test
-          fun `findById should return the {{domainLower}} when it exists`() {
-              val existing = {{domainUpper}}(id = 1L, name = "test")
-              every { {{domainLower}}RepositoryPort.findById(1L) } returns existing
-
-              val result = service.findById(1L)
-
-              assertEquals(existing, result)
-          }
-
-          @Test
-          fun `findById should throw when the {{domainLower}} does not exist`() {
-              every { {{domainLower}}RepositoryPort.findById(99L) } returns null
-
-              assertThrows({{domainUpper}}NotFoundException::class.java) {
-                  service.findById(99L)
-              }
-          }
-      }
-
-  # --- Test d'intégration du contrôleur (contexte Spring complet + MockMvc) ---
-  - path: "src/test/kotlin/{{packagePath}}/infrastructure/adapters/inbound/web/{{domainUpper}}ControllerTest.kt"
-    content: |
-      package {{basePackage}}.infrastructure.adapters.inbound.web
-
-      import com.fasterxml.jackson.databind.ObjectMapper
-      import org.junit.jupiter.api.Test
-      import org.springframework.beans.factory.annotation.Autowired
-      import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-      import org.springframework.boot.test.context.SpringBootTest
-      import org.springframework.http.MediaType
-      import org.springframework.test.web.servlet.MockMvc
-      import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
-      import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
-
-      @SpringBootTest
-      @AutoConfigureMockMvc
-      class {{domainUpper}}ControllerTest {
-
-          @Autowired
-          lateinit var mockMvc: MockMvc
-
-          @Autowired
-          lateinit var objectMapper: ObjectMapper
-
-          @Test
-          fun `POST should create a {{domainLower}} and return 201`() {
-              val request = Create{{domainUpper}}Request(name = "test")
-
-              mockMvc.perform(
-                  post("/api/{{domainLower}}s")
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(request))
-              )
-                  .andExpect(status().isCreated)
-                  .andExpect(jsonPath("$.name").value("test"))
-          }
-
-          @Test
-          fun `POST with blank name should return 400`() {
-              val request = Create{{domainUpper}}Request(name = "")
-
-              mockMvc.perform(
-                  post("/api/{{domainLower}}s")
-                      .contentType(MediaType.APPLICATION_JSON)
-                      .content(objectMapper.writeValueAsString(request))
-              )
-                  .andExpect(status().isBadRequest)
-          }
-
-          @Test
-          fun `GET unknown id should return 404`() {
-              mockMvc.perform(get("/api/{{domainLower}}s/999"))
-                  .andExpect(status().isNotFound)
-          }
-      }
 
   - path: ".gitignore"
     content: |
@@ -471,3 +136,515 @@ files:
       .idea/
       *.iml
       .DS_Store
+
+  - path: "domain/pom.xml"
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://apache.org"
+               xmlns:xsi="http://w3.org"
+               xsi:schemaLocation="http://apache.org http://apache.org">
+          <modelVersion>4.0.0</modelVersion>
+
+          <parent>
+              <groupId>{{basePackage}}</groupId>
+              <artifactId>{{projectName}}</artifactId>
+              <version>0.0.1-SNAPSHOT</version>
+              <relativePath>../pom.xml</relativePath>
+          </parent>
+
+          <artifactId>domain</artifactId>
+
+          <dependencies>
+              
+              <!-- Kotlin-->
+              <dependency>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-stdlib</artifactId>
+              </dependency>
+      
+              <!-- Test -->
+              
+              <dependency>
+                  <groupId>org.jetbrains.kotlin</groupId>
+                  <artifactId>kotlin-test-junit5</artifactId>
+                  <scope>test</scope>
+              </dependency>
+              <dependency>
+                  <groupId>io.mockk</groupId>
+                  <artifactId>mockk-jvm</artifactId>
+                  <version>${mockk.version}</version>
+                  <scope>test</scope>
+              </dependency>
+              <dependency>
+                  <artifactId>junit-jupiter-params</artifactId>
+                  <groupId>org.junit.jupiter</groupId>
+                  <scope>test</scope>
+              </dependency>
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-test</artifactId>
+                  <scope>test</scope>
+              </dependency>
+          </dependencies>
+
+          <build>
+              <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+              <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+              <plugins>
+                  <plugin>
+                      <groupId>org.jetbrains.kotlin</groupId>
+                      <artifactId>kotlin-maven-plugin</artifactId>
+                  </plugin>
+              </plugins>
+          </build>
+      </project>
+
+  - path: "domain/src/main/kotlin/{{packagePath}}/"
+    files:
+      - subpath: "models/ModelExample.kt"
+        content: |
+          package {{packagePath}}.models
+          data class ModelExample(val id:Int)
+
+      - subpath: "models/valueobjects/ValueObjectExample.kt"
+        content: |
+          package {{packagePath}}.models.valueobjects
+          data class ValueObjectExample(val id:Int)
+
+      - subpath: "ports/inbound/ExampleUseCase.kt"
+        content: |
+          package {{packagePath}}.ports.inbound
+          import {{packagePath}}.models.ModelExample
+          
+          interface ExampleUseCase{
+            fun findById (id:Int) : ModelExample?
+            fun save (example: ModelExample)
+          }
+
+      - subpath: "ports/outbound/ExampleRepositoryPort.kt"
+        content: |
+          package {{packagePath}}.ports.outbound
+          
+          import {{packagePath}}.models.ModelExample
+          
+          interface ExampleRepositoryPort{
+            fun findById(id: Int): ModelExample?
+            fun save(example: ModelExample) 
+          }
+
+      - subpath: "services/ExampleUseCaseImpl.kt"
+        content: |
+          package {{packagePath}}.services
+          
+          import {{packagePath}}.models.ModelExample
+          import {{packagePath}}.ports.outbound.ExampleRepositoryPort
+          import {{packagePath}}.ports.inbound.ExampleUseCase
+          
+          class ExampleUseCaseImpl(
+            private val exampleRepository: ExampleRepositoryPort
+          ) : ExampleUseCase {
+          
+            override fun findById(id: Int): ModelExample?{
+              return ModelExample(id)
+            }
+            override fun save(example: ModelExample) {
+            }
+          }
+
+  - path: "domain/src/test/kotlin/{{packagePath}}/"
+    files:
+      - subpath: "ports/inbound/ExampleUseCaseTest.kt"
+        content: |
+          package {{packagePath}}.ports.inbound
+  
+          import org.junit.jupiter.api.Test
+          
+          class ExampleUseCaseTest{
+          
+            @Test
+            fun `should be valid example`(){
+            }
+          }
+      - subpath: "ports/outbound/ExampleRepositoryPortTest.kt"
+        content: |
+          package {{packagePath}}.ports.outbound
+          
+          import org.junit.jupiter.api.Test
+          
+          class ExampleRepositoryPortTest{
+          
+            @Test
+            fun `should be valid example`(){
+            }
+          }
+      - subpath: "services/ExampleUseCaseImplTest.kt"
+        content: |
+          package {{packagePath}}.services
+          
+          import org.junit.jupiter.api.Test
+          
+          class ExampleUseCaseImplTest(){
+          
+            @Test
+            fun `should be valid example`(){
+            }
+          }
+
+### Infrastructure Main
+  - path: "infrastructure/pom.xml"
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <project xmlns="http://apache.org"
+               xmlns:xsi="http://w3.org"
+               xsi:schemaLocation="http://apache.org http://apache.org">
+          <modelVersion>4.0.0</modelVersion>
+
+          <parent>
+              <groupId>{{basePackage}}</groupId>
+              <artifactId>{{projectName}}</artifactId>
+              <version>0.0.1-SNAPSHOT</version>
+              <relativePath>../pom.xml</relativePath>
+          </parent>
+
+          <properties>
+              <springdoc.version>{{springdoc-version}}</springdoc.version>
+              <jdbc.version>{{jdbc-version}}</jdbc.version>
+              <liquibase.version>{{liquibase-version}}</liquibase.version>
+              <webmvc-ui.version>{{webmvc-ui-version}}</webmvc-ui.version>
+          </properties>
+
+          <artifactId>infrastructure</artifactId>
+
+          <dependencies>
+              <!-- Kotlin -->
+              <dependency>
+                  <groupId>org.jetbrains.kotlin</groupId>
+                  <artifactId>kotlin-reflect</artifactId>
+              </dependency>
+      
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter</artifactId>
+              </dependency>
+              <dependency>
+                  <groupId>{{basePackage}}</groupId>
+                  <artifactId>domain</artifactId>
+                  <version>${project.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-web</artifactId>
+              </dependency>
+              <dependency>
+                  <groupId>org.springdoc</groupId>
+                  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                  <version>${webmvc-ui.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-validation</artifactId>
+              </dependency>
+
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-data-jdbc</artifactId>
+              </dependency>
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-liquibase</artifactId>
+              </dependency>
+              <dependency>
+                  <groupId>org.postgresql</groupId>
+                  <artifactId>postgresql</artifactId>
+                  <scope>runtime</scope>
+              </dependency>
+
+              <dependency>
+                  <groupId>com.fasterxml.jackson.module</groupId>
+                  <artifactId>jackson-module-kotlin</artifactId>
+              </dependency>
+  
+              <dependency>
+                  <groupId>org.springdoc</groupId>
+                  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                  <version>${springdoc.version}</version>
+              </dependency>
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-jdbc</artifactId>
+                  <version>${jdbc.version}</version>
+              </dependency>
+              <!-- Tests Scope -->
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-test</artifactId>
+                  <scope>test</scope>
+              </dependency>
+              <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-liquibase-test</artifactId>
+                  <version>${liquibase.version}</version>
+                  <scope>test</scope>
+              </dependency>
+              <!-- To remove-->
+              <dependency>
+                  <groupId>com.h2database</groupId>
+                  <artifactId>h2</artifactId>
+                  <scope>runtime</scope>
+              </dependency>
+          </dependencies>
+
+
+          <build>
+              <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+              <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+              <plugins>
+                  <plugin>
+                      <groupId>org.jetbrains.kotlin</groupId>
+                      <artifactId>kotlin-maven-plugin</artifactId>
+                  </plugin>
+              </plugins>
+          </build>
+      </project>
+  - path: "infrastructure/src/main/kotlin/{{packagePath}}/"
+    files:
+      - subpath: "{{projectPascalCase}}Application.kt"
+        content: |
+          package {{packagePath}}
+  
+          import org.springframework.boot.autoconfigure.SpringBootApplication
+          import org.springframework.boot.runApplication
+          
+          @SpringBootApplication
+          class {{projectPascalCase}}Application
+        
+          fun main(args: Array<String>) {
+            runApplication<{{projectPascalCase}}Application>(*args)
+          }
+
+      - subpath: "adapters/inbound/rest/ExampleApiAdapter.kt"
+        content: |
+          package {{packagePath}}.adapters.inbound.rest
+          
+          import org.springframework.web.bind.annotation.RestController
+          import org.springframework.web.bind.annotation.PostMapping
+          
+          @RestController
+          class ExampleApiAdapter(
+          
+          ){
+            @PostMapping("/example/endpoint")
+            fun `example method`(example: Int){
+            }
+          }
+
+      - subpath: "adapters/inbound/rest/dto/ExampleDTO.kt"
+        content: |
+          package {{packagePath}}.adapters.inbound.rest.dto
+          import {{packagePath}}.models.ModelExample
+          data class ExampleDTO(val example: Int)
+
+          fun ExampleDTO.toModelExample(): ModelExample {
+              return ModelExample(id=this.example)
+          }
+
+      - subpath: "adapters/outbound/repository/ExampleJdbcAdapter.kt"
+        content: |
+          package {{packagePath}}.adapters.outbound.repository
+          
+          import {{packagePath}}.ports.outbound.ExampleRepositoryPort
+          import {{packagePath}}.models.ModelExample
+  
+          import org.springframework.jdbc.core.simple.JdbcClient
+          import org.springframework.stereotype.Component
+
+          @Component
+          class ExampleJdbcAdapter(
+              val jdbcClient: JdbcClient
+          ): ExampleRepositoryPort {
+
+              override fun findById(id: Int): ModelExample? {
+                  val sql = """
+                       SELECT * 
+                       FROM example
+                       WHERE id = :id
+                  """.trimIndent()
+
+                  return jdbcClient.sql(sql)
+                      .param("id", id)
+                      .query{ rs, _ ->
+                          ModelExample(
+                              id = rs.getInt("id")
+                          )
+                      }
+                      .optional()
+                      .orElse(null)
+              }
+
+              override fun save(example: ModelExample) {
+                 val sql = """
+                      INSERT INTO example (id) 
+                      VALUES (:id)
+                 """.trimIndent()
+                  jdbcClient.sql(sql)
+                      .param("id", example.id.toString())
+                      .update()
+              }
+          }
+      - subpath: "config/DomainConfiguration.kt"
+        content: |
+          package {{packagePath}}.config
+          
+          import {{packagePath}}.ports.inbound.ExampleUseCase
+          import {{packagePath}}.ports.outbound.ExampleRepositoryPort
+          import {{packagePath}}.services.ExampleUseCaseImpl
+          
+          import org.springframework.context.annotation.Bean
+          import org.springframework.context.annotation.Configuration
+          
+          @Configuration
+          class DomainConfiguration{    
+            @Bean
+            fun exampleUseCase(exampleRepositoryPort: ExampleRepositoryPort): ExampleUseCase {
+              return ExampleUseCaseImpl(exampleRepositoryPort)
+            }
+          }
+  - path: "infrastructure/src/main/resources/"
+    files:
+      - subpath: "db.changelog/db.changelog-master.yaml"
+        content: |
+          databaseChangeLog:
+          - changeSet:
+              id: 0-initial-empty-changelog
+              author: autolog
+              changes:
+                - empty: {}
+
+      - subpath: application.yaml
+        content: |
+          spring:
+            application:
+              name: AutoLog
+            profiles:
+              active: local
+          
+          ---
+          
+          server:
+            port: 8080
+          
+          spring:
+            liquibase:
+              enabled: false
+            config:
+              activate:
+                on-profile: local
+            datasource:
+              url: jdbc:h2:mem:testdb
+              driver-class-name: org.h2.Driver
+              username: sa
+              password:
+          #  datasource:
+          #    url: jdbc:postgresql://localhost:5432/AutoLog
+          #    username: AutoLog_Admin
+          #    password:
+          
+          springdoc:
+            api-docs:
+              enabled: true
+              path: /v1/api-docs
+          
+          
+          
+          ---
+          
+          spring:
+            config:
+              activate:
+                on-profile: prod
+            datasource:
+              url: jdbc:postgresql://localhost:5432/AutoLog
+              username: AutoLog_Admin
+              password:
+              hikari:
+                maximum-pool-size: 3
+                minimum-idle: 1
+                idle-timeout: 10000
+          server:
+            tomcat:
+              threads:
+                max: 10
+                min-spare: 2
+          springdoc:
+            api-docs:
+              enabled: false
+
+  - path: "infrastructure/src/test/"
+    files:
+      - subpath: "kotlin/{{packagePath}}/IntegrationTest.kt"
+        content: |
+          package {{packagePath}}
+          import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase
+          import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest
+          import org.springframework.test.context.TestPropertySource
+
+          @Target(AnnotationTarget.CLASS)
+          @Retention(AnnotationRetention.RUNTIME)
+          @JdbcTest
+          @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+          @TestPropertySource(properties = ["spring.sql.init.mode=always"])
+          annotation class IntegrationTest
+      
+
+      - subpath: "kotlin/{{packagePath}}/adapters/inbound/rest/ExampleApiTest.kt"
+        content: |
+          package {{packagePath}}.adapters.inbound.rest
+          class ExampleApiTest{
+            
+          }
+      - subpath: "kotlin/{{packagePath}}/adapters/inbound/rest/dto/ExampleDTOTest.kt"
+        content: |
+          package {{packagePath}}.adapters.inbound.rest.dto
+          class ExampleDTOTest{
+
+          }
+      - subpath: "kotlin/{{packagePath}}/adapters/outbound/repository/ExampleJdbcAdapterTest.kt"
+        content: |
+          package {{packagePath}}.adapters.outbound.repository
+          class ExampleJdbcAdapterTest{
+
+          }
+      - subpath: "resources/application.yaml"
+        content: |
+          spring:
+          liquibase:
+            enabled: false
+          sql:
+            init:
+              mode: never
+          autoconfigure:
+            exclude:
+              - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration'
+
+      - subpath: "kotlin/{{packagePath}}/adapters/outbound/repository/stub/InMemoryJdbcExampleRepositoryAdapter.kt"
+        content: |
+          package {{packagePath}}.adapters.outbound.repository.stub
+
+          import {{packagePath}}.models.ModelExample
+          import {{packagePath}}.ports.outbound.ExampleRepositoryPort
+          import java.util.*
+          import java.util.concurrent.ConcurrentHashMap
+
+          class InMemoryJdbcExampleRepositoryAdapter : ExampleRepositoryPort{
+              private val database = ConcurrentHashMap<Int, ModelExample>()
+
+              override fun findById(id: Int): ModelExample? {
+                  return database[id]
+              }
+              override fun save(example: ModelExample) {
+                  database[example.id] = example
+              }
+              fun clear(){
+                  database.clear()
+              }
+          }

@@ -1,0 +1,319 @@
+config:
+  springBoot-version: 4.0.0
+  springBootStarterParent-version: 4.1.1
+  java-version: 25
+  kotlin-version: 2.4.20
+  junit-version: 6.0.3
+  mockk-version: 1.14.11
+  springdoc-version: 3.1.1
+  jdbc-version: 4.1.1
+  liquibase-version: 4.1.1
+  webmvc-ui-version: 3.1.1
+
+  baseGroupId: com.example
+
+Project:
+  paths:
+    - path: "pom.xml"
+      content: |
+        <?xml version="1.0" encoding="UTF-8"?>
+        <project xmlns="http://maven.apache.org/POM/4.0.0"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+            <modelVersion>4.0.0</modelVersion>
+        
+            <parent>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-parent</artifactId>
+                <version>{{springBootStarterParent-version}}</version>
+                <relativePath/>
+            </parent>
+        
+            <groupId>{{basePackage}}</groupId>
+            <artifactId>{{projectName}}</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <name>{{projectName}}</name>
+            <description>{{projectName}}</description>
+        
+            <properties>
+                <java.version>{{java-version}}</java.version>
+                <kotlin.version>{{kotlin-version}}</kotlin.version>
+                <junit.version>{{junit-version}}</junit.version>
+                <mockk.version>{{mockk-version}}</mockk.version>
+                <springdoc.version>{{springdoc-version}}</springdoc.version>
+                <jdbc.version>{{jdbc-version}}</jdbc.version>
+                <liquibase.version>{{liquibase-version}}</liquibase.version>
+                <webmvc-ui.version>{{webmvc-ui-version}}</webmvc-ui.version>
+            </properties>
+        
+            <dependencies>
+                <!-- Spring Boot Starters -->
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-web</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-data-jpa</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-validation</artifactId>
+                </dependency>
+        
+                <!-- kotlin-->
+        
+                <dependency>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-reflect</artifactId>
+                </dependency>
+                <dependency>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib</artifactId>
+                </dependency>
+                
+                <!-- Database -->
+        
+                <dependency>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                    <scope>runtime</scope>
+                </dependency>
+                <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-jdbc</artifactId>
+                  <version>${jdbc.version}</version>
+                </dependency>
+                        <dependency>
+                  <groupId>org.springframework.boot</groupId>
+                  <artifactId>spring-boot-starter-liquibase-test</artifactId>
+                  <version>${liquibase.version}</version>
+                  <scope>test</scope>
+                </dependency>
+                
+                <!-- Test -->
+        
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-test</artifactId>
+                    <scope>test</scope>
+                </dependency>
+                <dependency>
+                  <groupId>org.junit.jupiter</groupId>
+                  <artifactId>junit-jupiter-engine</artifactId>
+                  <version>${junit.version}</version>
+                  <scope>test</scope>
+                </dependency>
+                <dependency>
+                  <groupId>io.mockk</groupId>
+                  <artifactId>mockk-jvm</artifactId>
+                  <version>${mockk.version}</version>
+                  <scope>test</scope>
+                </dependency>
+                
+                <!-- Documentation -->
+        
+                <dependency>
+                  <groupId>org.springdoc</groupId>
+                  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                  <version>${webmvc-ui.version}</version>
+                </dependency>
+                <dependency>
+                  <groupId>org.springdoc</groupId>
+                  <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                  <version>${springdoc.version}</version>
+                </dependency>
+            </dependencies>
+        
+            <build>
+                <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+                <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-plugin</artifactId>
+                        <version>${kotlin.version}</version>
+                        <configuration>
+                            <args>
+                                <arg>-Xjsr305=strict</arg>
+                            </args>
+                            <compilerPlugins>
+                                <plugin>spring</plugin>
+                                <plugin>jpa</plugin>
+                            </compilerPlugins>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </project>
+
+    - path: ".gitignore"
+      content: |
+        target/
+        .idea/
+        *.iml
+        .DS_Store
+
+    # Application principale
+    - path: "src/main/kotlin/{{packagePath}}/"
+      files:
+        - subpath: "{{projectPascalCase}}Application.kt"
+          content: |
+            package {{packagePath}}
+            
+            import org.springframework.boot.autoconfigure.SpringBootApplication
+            import org.springframework.boot.runApplication
+            
+            @SpringBootApplication
+            class {{projectPascalCase}}Application
+            
+            fun main(args: Array<String>) {
+                runApplication<{{projectPascalCase}}Application>(*args)
+            }
+
+        # COUCHE 1 : Présentation / Web (Controllers + DTOs)
+        - subpath: "controllers/ExampleController.kt"
+          content: |
+            package {{packagePath}}.controllers
+            
+            import {{packagePath}}.services.ExampleService
+            import {{packagePath}}.controllers.dto.ExampleRequest
+            import {{packagePath}}.controllers.dto.ExampleResponse
+            import org.springframework.http.HttpStatus
+            import org.springframework.web.bind.annotation.*
+            
+            @RestController
+            @RequestMapping("/api/v1/examples")
+            class ExampleController(
+                private val exampleService: ExampleService
+            ) {
+                @GetMapping("/{id}")
+                fun getById(@PathVariable id: Long): ExampleResponse {
+                    return exampleService.findById(id)
+                }
+            
+                @PostMapping
+                @ResponseStatus(HttpStatus.CREATED)
+                fun create(@RequestBody request: ExampleRequest): ExampleResponse {
+                    return exampleService.create(request)
+                }
+            }
+
+        - subpath: "controllers/dto/ExampleRequest.kt"
+          content: |
+            package {{packagePath}}.controllers.dto
+            
+            data class ExampleRequest(
+                val name: String
+            )
+
+        - subpath: "controllers/dto/ExampleResponse.kt"
+          content: |
+            package {{packagePath}}.controllers.dto
+            
+            data class ExampleResponse(
+                val id: Long,
+                val name: String
+            )
+
+        # COUCHE 2 : Métier / Métier (Services)
+        - subpath: "services/ExampleService.kt"
+          content: |
+            package {{packagePath}}.services
+            
+            import {{packagePath}}.repositories.ExampleRepository
+            import {{packagePath}}.entities.ExampleEntity
+            import {{packagePath}}.controllers.dto.ExampleRequest
+            import {{packagePath}}.controllers.dto.ExampleResponse
+            import org.springframework.stereotype.Service
+            import org.springframework.transaction.annotation.Transactional
+            
+            @Service
+            class ExampleService(
+                private val exampleRepository: ExampleRepository
+            ) {
+                @Transactional(readOnly = true)
+                fun findById(id: Long): ExampleResponse {
+                    val entity = exampleRepository.findById(id)
+                        .orElseThrow { NoSuchElementException("Example not found with id: $id") }
+                    return ExampleResponse(id = entity.id, name = entity.name)
+                }
+            
+                @Transactional
+                fun create(request: ExampleRequest): ExampleResponse {
+                    val savedEntity = exampleRepository.save(ExampleEntity(name = request.name))
+                    return ExampleResponse(id = savedEntity.id, name = savedEntity.name)
+                }
+            }
+
+        # COUCHE 3 : Données / Persistence (Entities + Repositories)
+        - subpath: "entities/ExampleEntity.kt"
+          content: |
+            package {{packagePath}}.entities
+            
+            import jakarta.persistence.*
+            
+            @Entity
+            @Table(name = "examples")
+            class ExampleEntity(
+                @Id
+                @GeneratedValue(strategy = GenerationType.IDENTITY)
+                val id: Long = 0,
+            
+                @Column(nullable = false)
+                var name: String
+            )
+
+        - subpath: "repositories/ExampleRepository.kt"
+          content: |
+            package {{packagePath}}.repositories
+            
+            import {{packagePath}}.entities.ExampleEntity
+            import org.springframework.data.jpa.repository.JpaRepository
+            import org.springframework.stereotype.Repository
+            
+            @Repository
+            interface ExampleRepository : JpaRepository<ExampleEntity, Long>
+
+    # Resources
+    - path: "src/main/resources/"
+      files:
+        - subpath: "application.yaml"
+          content: |
+            spring:
+              application:
+                name: {{projectName}}
+              datasource:
+                url: jdbc:h2:mem:testdb
+                driver-class-name: org.h2.Driver
+                username: sa
+                password:
+              h2:
+                console:
+                  enabled: true
+              jpa:
+                database-platform: org.hibernate.dialect.H2Dialect
+                hibernate:
+                  ddl-auto: update
+
+    # Tests
+    - path: "src/test/kotlin/{{packagePath}}/"
+      files:
+        - subpath: "controllers/ExampleControllerTest.kt"
+          content: |
+            package {{packagePath}}.controllers
+            
+            import org.junit.jupiter.api.Test
+            import org.springframework.boot.test.context.SpringBootTest
+            
+            @SpringBootTest
+            class ExampleControllerTest {
+            
+                @Test
+                fun contextLoads() {
+                }
+            }
